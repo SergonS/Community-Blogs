@@ -1,6 +1,7 @@
 package com.sergon.blogpost.service;
 
 import com.sergon.blogpost.dto.RegisterRequest;
+import com.sergon.blogpost.model.NotificationEmail;
 import com.sergon.blogpost.model.User;
 import com.sergon.blogpost.model.VerificationToken;
 import com.sergon.blogpost.repository.UserRepository;
@@ -21,6 +22,7 @@ public class AuthService
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
+    private final MailService mailService;
 
     @Transactional
     public void signup(RegisterRequest registerRequest)
@@ -38,7 +40,12 @@ public class AuthService
         // Saving user
         userRepository.save(user);
 
-        generateVerificationToken(user);
+        String token = generateVerificationToken(user);
+
+        mailService.sendMail(new NotificationEmail("Please Activate your Account",
+                user.getEmail(), "Thank you for signing up to Community Blogs, " + user.getUsername() +
+                " please click on the url below to activate your account: " +
+                "http://localhost:8080/api/auth/accountVerification/" + token));
     }
 
     private String generateVerificationToken(User user)
