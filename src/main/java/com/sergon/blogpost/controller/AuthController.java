@@ -22,7 +22,7 @@ public class AuthController
     {
         authService.signup(registerRequest);
 
-        return new ResponseEntity<>("User Registration Succesful",
+        return new ResponseEntity<>("User Registration Successful",
                 HttpStatus.OK);
     }
 }
