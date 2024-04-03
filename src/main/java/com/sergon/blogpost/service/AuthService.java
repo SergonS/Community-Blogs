@@ -1,18 +1,22 @@
 package com.sergon.blogpost.service;
 
 import com.sergon.blogpost.dto.RegisterRequest;
+import com.sergon.blogpost.exceptions.BlogpostException;
 import com.sergon.blogpost.model.NotificationEmail;
 import com.sergon.blogpost.model.User;
 import com.sergon.blogpost.model.VerificationToken;
 import com.sergon.blogpost.repository.UserRepository;
 import com.sergon.blogpost.repository.VerificationTokenRepository;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -60,5 +64,29 @@ public class AuthService
         verificationTokenRepository.save(verificationToken);
 
         return token;
+    }
+
+    public void verifyAccount(String token)
+    {
+        // Search for token and retrieve it if found
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+
+        // Throw exception due to token not being found
+        verificationToken.orElseThrow(() -> new BlogpostException("Invalid Token"));
+
+        fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    private void fetchUserAndEnable(VerificationToken verificationToken)
+    {
+        String username = verificationToken.getUser().getUsername();
+
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new BlogpostException("User not found with name - " + username));
+
+        user.setEnabled(true);
+
+        userRepository.save(user);
     }
 }
