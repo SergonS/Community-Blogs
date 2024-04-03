@@ -1,5 +1,6 @@
 package com.sergon.blogpost.controller;
 
+import com.sergon.blogpost.dto.LoginRequest;
 import com.sergon.blogpost.dto.RegisterRequest;
 import com.sergon.blogpost.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -30,5 +31,11 @@ public class AuthController
 
         return new ResponseEntity<>("Account Activated Successfully",
                 HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public void login(@RequestBody LoginRequest loginRequest)
+    {
+        authService.login(loginRequest);
     }
 }

@@ -1,5 +1,6 @@
 package com.sergon.blogpost.service;
 
+import com.sergon.blogpost.dto.LoginRequest;
 import com.sergon.blogpost.dto.RegisterRequest;
 import com.sergon.blogpost.exceptions.BlogpostException;
 import com.sergon.blogpost.model.NotificationEmail;
@@ -10,6 +11,8 @@ import com.sergon.blogpost.repository.VerificationTokenRepository;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,7 @@ public class AuthService
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public void signup(RegisterRequest registerRequest)
@@ -88,5 +92,13 @@ public class AuthService
         user.setEnabled(true);
 
         userRepository.save(user);
+    }
+
+    public void login(LoginRequest loginRequest)
+    {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                loginRequest.getPassword()));
+
+
     }
 }
