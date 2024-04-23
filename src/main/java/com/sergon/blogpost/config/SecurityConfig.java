@@ -3,6 +3,7 @@ package com.sergon.blogpost.config;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,7 +19,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableWebSecurity
@@ -27,12 +34,21 @@ public class SecurityConfig
 {
     private final UserDetailsService userDetailsService;
 
+    @Value("classpath:app.pub")
+    RSAPublicKey publicKey;
+
+    @Value("classpath:app.key")
+    RSAPrivateKey privateKey;
+
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
             throws Exception
     {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
@@ -46,6 +62,7 @@ public class SecurityConfig
                 .build();
     }
 
+    /*
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception
     {
@@ -58,10 +75,17 @@ public class SecurityConfig
             throw new RuntimeException(e);
         }
     }
+    */
 
     @Bean
     PasswordEncoder passwordEncoder()
     {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder()
+    {
+        return NimbusJwtDecoder.withPublicKey(this.publicKey).build();
     }
 }
