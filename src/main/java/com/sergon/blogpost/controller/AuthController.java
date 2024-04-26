@@ -1,5 +1,6 @@
 package com.sergon.blogpost.controller;
 
+import com.sergon.blogpost.dto.AuthenticationResponse;
 import com.sergon.blogpost.dto.LoginRequest;
 import com.sergon.blogpost.dto.RegisterRequest;
 import com.sergon.blogpost.service.AuthService;
@@ -35,9 +36,9 @@ public class AuthController
 
 
     @PostMapping("/login")
-    public void login(@RequestBody LoginRequest loginRequest)
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest)
     {
-        authService.login(loginRequest);
+        return authService.login(loginRequest);
     }
 
 

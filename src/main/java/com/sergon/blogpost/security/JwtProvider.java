@@ -1,7 +1,9 @@
 package com.sergon.blogpost.security;
 
+import com.sergon.blogpost.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -17,6 +19,13 @@ public class JwtProvider
 
     @Value("${jwt.expiration.time}")
     private Long jwtExpirationInMillis;
+
+    public String generateToken(Authentication authentication)
+    {
+        User principal = (User) authentication.getPrincipal();
+
+        return generateTokenWithUserName(principal.getUsername());
+    }
 
     public String generateTokenWithUserName(String username)
     {

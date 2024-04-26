@@ -1,5 +1,6 @@
 package com.sergon.blogpost.service;
 
+import com.sergon.blogpost.dto.AuthenticationResponse;
 import com.sergon.blogpost.dto.LoginRequest;
 import com.sergon.blogpost.dto.RegisterRequest;
 import com.sergon.blogpost.exceptions.BlogpostException;
@@ -8,11 +9,14 @@ import com.sergon.blogpost.model.User;
 import com.sergon.blogpost.model.VerificationToken;
 import com.sergon.blogpost.repository.UserRepository;
 import com.sergon.blogpost.repository.VerificationTokenRepository;
+import com.sergon.blogpost.security.JwtProvider;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +35,7 @@ public class AuthService
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest)
@@ -95,12 +100,19 @@ public class AuthService
     }
 
 
-    public void login(LoginRequest loginRequest)
+    public AuthenticationResponse login(LoginRequest loginRequest)
     {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                 loginRequest.getPassword()));
 
+        // Store authentication object.
+        // This can be used to check if user is logged in
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
 
+        // Build authentication token as String
+        String token = jwtProvider.generateToken(authenticate);
+
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 
 
